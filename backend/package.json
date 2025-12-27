@@ -1,0 +1,15 @@
+{
+  "name": "fees-backend",
+  "version": "1.0.0",
+  "main": "server-fixed.js",
+  "scripts": {
+    "start": "node server-fixed.js",
+    "dev": "nodemon server-fixed.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0"
+  }
+}
