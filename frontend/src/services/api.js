@@ -1,3 +1,4 @@
+// services/api.js - Complete corrected version
 import axios from 'axios';
 
 // Use port 5001 to avoid conflicts
@@ -24,6 +25,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => {
         console.log(`✅ ${response.status} ${response.config.url}`);
+        console.log('✅ Response data:', response.data);
         return response.data;
     },
     (error) => {
@@ -33,57 +35,44 @@ api.interceptors.response.use(
             message: error.message
         });
         
+        if (error.response) {
+            console.error('❌ Error response data:', error.response.data);
+            console.error('❌ Error status:', error.response.status);
+        }
+        
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login';
         }
         
-        return Promise.reject(error.response?.data?.message || error.message);
+        return Promise.reject(error.response?.data?.message || error.message || 'Network error');
     }
 );
 
 export const authAPI = {
-    // Change login to accept separate arguments
-    login: (identifier, password) => api.post('/auth/login', { identifier, password }),
+    login: async (identifier, password) => {
+        try {
+            console.log('🔐 API Login attempt:', identifier);
+            
+            const response = await api.post('/auth/login', {
+                identifier,
+                password
+            });
+            
+            console.log('🔐 API Login response:', response);
+            return response;
+            
+        } catch (error) {
+            console.error('🔐 API Login error:', error);
+            throw error;
+        }
+    },
     
     registerStudent: (data) => api.post('/auth/register/student', data),
     getCurrentUser: () => api.get('/auth/me'),
     testConnection: () => api.get('/test'),
     healthCheck: () => api.get('/health')
-};
-
-const login = async (identifier, password) => {
-    try {
-        console.log('🔍 AuthContext - login called:', identifier);
-        
-        // Now pass as separate arguments
-        const response = await authAPI.login(identifier, password);
-        console.log('🔍 AuthContext - API response:', response);
-        
-        // Check response structure
-        const token = response.token;
-        const user = response.user;
-        
-        if (!token || !user) {
-            console.error('🔍 Invalid response structure:', response);
-            return { success: false, message: 'Invalid server response' };
-        }
-        
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        setUser(user);
-        
-        console.log('🔍 Login successful, user role:', user.role);
-        return { success: true, user, token };
-        
-    } catch (error) {
-        console.error('🔍 AuthContext - login error:', error);
-        return { 
-            success: false, 
-            message: error.message || 'Login failed' 
-        };
-    }
 };
 
 export default api;

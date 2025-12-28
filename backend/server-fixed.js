@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'venkat@78',
     database: 'fees_queue_management'
 });
 
